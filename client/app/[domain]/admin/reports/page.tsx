@@ -10,7 +10,7 @@ export default function AdminReportsPage() {
     useEffect(() => {
         if (!user) return;
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/reports`, {
-            headers: { 'Authorization': `Bearer ${user.token}` }
+            headers: { 'Authorization': `Bearer ${user?.token}` }
         })
             .then(res => res.json())
             .then(data => setStats(data))
