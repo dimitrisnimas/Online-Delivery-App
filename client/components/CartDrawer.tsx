@@ -3,7 +3,7 @@
 import React from 'react';
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCart } from '../store/useCart';
-import { cn } from '../lib/utils'; // Assuming we have this, or just use classNames logic
+import { cn } from '@/lib/utils';
 
 interface CartDrawerProps {
     isOpen: boolean;
