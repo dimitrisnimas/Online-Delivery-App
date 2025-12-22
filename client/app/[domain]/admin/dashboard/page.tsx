@@ -24,7 +24,7 @@ export default function AdminDashboardPage() {
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
                     headers: {
-                        'Authorization': `Bearer ${user.token}`
+                        'Authorization': `Bearer ${user?.token}`
                     }
                 });
                 if (res.ok) {
@@ -65,8 +65,8 @@ export default function AdminDashboardPage() {
                                             <div className="text-right">
                                                 <p className="font-bold text-gray-900">${Number(order.total).toFixed(2)}</p>
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status?.name === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                        order.status?.name === 'Completed' ? 'bg-green-100 text-green-800' :
-                                                            'bg-gray-100 text-gray-800'
+                                                    order.status?.name === 'Completed' ? 'bg-green-100 text-green-800' :
+                                                        'bg-gray-100 text-gray-800'
                                                     }`}>
                                                     {order.status?.name || 'Unknown'}
                                                 </span>
