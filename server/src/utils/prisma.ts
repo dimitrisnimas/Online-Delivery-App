@@ -1,8 +1,14 @@
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-// Passing 'log' options to satisfy "non-empty options" requirement if needed,
-// and avoiding 'datasources' TS error by relying on env var.
+const connectionString = process.env.DATABASE_URL;
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+
 const prisma = new PrismaClient({
+    adapter,
     log: ['error', 'warn'],
 });
 
