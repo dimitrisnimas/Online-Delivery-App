@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+model Store {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique // For subdomain like slug.deliveryapp.com
+  customDomain String? @unique // For mystore.com
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  settings    Json?    // Delivery fees, times, etc.
+
+  branches    Branch[]
+  users       User[]
+  products    Product[]
+  categories  Category[]
+  orders      Order[]
+  orderStages OrderStage[]
+}
+
+model Branch {
+  id        String @id @default(uuid())
+  name      String
+  address   String
+  phone     String?
+  storeId   String
+  store     Store  @relation(fields: [storeId], references: [id])
+}
+
+model User {
+  id        String @id @default(uuid())
+  email     String
+  password  String
+  name      String?
+  role      Role     @default(CUSTOMER)
+  
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id])
+
+  addresses Address[]
+  orders    Order[]
+
+  @@unique([email, storeId])
+}
+
+model Address {
+  id        String @id @default(uuid())
+  label     String? // Home, Work
+  line1     String
+  line2     String?
+  city      String
+  postcode  String
+  
+  userId    String
+  user      User   @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  sortOrder Int       @default(0)
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id])
+  products  Product[]
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  image       String?
+  isAvailable Boolean  @default(true)
+  
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+
+  variations  Variation[]
+  addons      Addon[]
+  orderItems  OrderItem[]
+}
+
+model Variation {
+  id        String  @id @default(uuid())
+  name      String
+  price     Decimal @db.Decimal(10, 2)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  orderItems OrderItem[]
+}
+
+model Addon {
+  id        String  @id @default(uuid())
+  name      String
+  price     Decimal @db.Decimal(10, 2)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  orderItemAddons OrderItemAddon[]
+}
+
+model OrderStage {
+  id        String @id @default(uuid())
+  name      String
+  sequence  Int
+  storeId   String
+  store     Store  @relation(fields: [storeId], references: [id])
+  orders    Order[]
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  number      Int      @default(autoincrement())
+  
+  total       Decimal  @db.Decimal(10, 2)
+  type        String   // DELIVERY, PICKUP
+  deliveryAddress String? // Snapshot of address
+  
+  statusId    String
+  status      OrderStage @relation(fields: [statusId], references: [id])
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+  
+  items       OrderItem[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  quantity    Int
+  price       Decimal @db.Decimal(10, 2)
+  
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id])
+  
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  
+  variationId String?
+  variation   Variation? @relation(fields: [variationId], references: [id])
+  
+  addons      OrderItemAddon[]
+}
+
+model OrderItemAddon {
+  id          String @id @default(uuid())
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  
+  addonId     String
+  addon       Addon  @relation(fields: [addonId], references: [id])
+  
+  price       Decimal @db.Decimal(10, 2)
+}
