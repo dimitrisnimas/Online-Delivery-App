@@ -28,7 +28,7 @@ export default function AdminProductsPage() {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${user.token}`
+                    'Authorization': `Bearer ${user?.token}`
                 },
                 body: formData // No Content-Type header when sending FormData
             });
