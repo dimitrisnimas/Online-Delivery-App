@@ -21,9 +21,10 @@ export default async function Layout({
     params
 }: {
     children: React.ReactNode;
-    params: { domain: string };
+    params: Promise<{ domain: string }>;
 }) {
-    const storeName = await getStoreName(params.domain);
+    const { domain } = await params;
+    const storeName = await getStoreName(domain);
 
     return (
         <div className="min-h-screen flex flex-col">
