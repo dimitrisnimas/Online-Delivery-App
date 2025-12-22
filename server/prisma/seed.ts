@@ -6,11 +6,11 @@ const prisma = new PrismaClient();
 async function main() {
     // Create a test store
     const store = await prisma.store.upsert({
-        where: { slug: 'demo' },
+        where: { slug: 'kubikonlinedelivery' },
         update: {},
         create: {
-            name: 'Demo Store',
-            slug: 'demo',
+            name: 'Kubik Online Delivery',
+            slug: 'kubikonlinedelivery',
             settings: {
                 deliveryFee: 5.00,
                 minOrder: 15.00,
