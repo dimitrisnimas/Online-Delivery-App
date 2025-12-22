@@ -30,8 +30,8 @@ async function getProducts(domain: string) {
     return res.json();
 }
 
-export default async function Page({ params }: { params: { domain: string } }) {
-    const { domain } = params;
+export default async function Page({ params }: { params: Promise<{ domain: string }> }) {
+    const { domain } = await params;
     const store = await getStoreData(domain);
     const products = await getProducts(domain);
 
