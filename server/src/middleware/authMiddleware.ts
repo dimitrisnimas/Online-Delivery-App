@@ -12,7 +12,12 @@ interface DecodedToken {
 declare global {
     namespace Express {
         interface Request {
-            user?: any; // Type with Prisma User
+            user?: {
+                id: string;
+                role: string;
+                storeId: string;
+                isSuperAdmin?: boolean;
+            };
         }
     }
 }
@@ -65,13 +70,17 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
 };
 
 export const admin = (req: Request, res: Response, next: NextFunction) => {
-    if (req.user && (req.user.role === 'ADMIN' || req.user.role === 'STAFF')) { // Allow staff too? Staff has dashboard access.
-        // Requirement: Staff "Login to store dashboard... Edit products".
-        // Admin "Full access".
-        // Let's assume protection is for Dashboard routes generally.
-        // We can refine 'admin' vs 'staff' middlewares.
+    if (req.user && (req.user.role === 'ADMIN' || req.user.role === 'STAFF')) {
         next();
     } else {
         res.status(401).json({ message: 'Not authorized as admin/staff' });
+    }
+};
+
+export const superAdmin = (req: Request, res: Response, next: NextFunction) => {
+    if (req.user && req.user.isSuperAdmin) {
+        next();
+    } else {
+        res.status(403).json({ message: 'Super admin access required' });
     }
 };
