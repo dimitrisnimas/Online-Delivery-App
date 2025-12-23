@@ -3,15 +3,21 @@ import prisma from '../utils/prisma';
 
 // @desc    Place new order
 // @route   POST /api/orders
-// @access  Private (Customer)
+// @access  Public (Guest or Customer)
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { items, type, deliveryAddress } = req.body;
+        const { items, type, deliveryAddress, guestName, guestEmail, guestPhone } = req.body;
         const store = req.store;
         const user = req.user;
 
-        if (!store || !user) {
-            res.status(400).json({ message: 'Context missing' });
+        if (!store) {
+            res.status(400).json({ message: 'Store context missing' });
+            return;
+        }
+
+        // Guest Checkout Validation
+        if (!user && (!guestEmail || !guestPhone)) {
+            res.status(400).json({ message: 'Please provide email and phone for guest checkout' });
             return;
         }
 
@@ -65,7 +71,10 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         const order = await prisma.order.create({
             data: {
                 storeId: store.id,
-                userId: user.id,
+                userId: user?.id, // Optional now
+                guestName,
+                guestEmail,
+                guestPhone,
                 total,
                 type,
                 deliveryAddress,
