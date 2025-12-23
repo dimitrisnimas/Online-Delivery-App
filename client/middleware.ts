@@ -32,9 +32,9 @@ export default async function middleware(req: NextRequest) {
         .replace('.vercel.app', '')
         .replace('.localhost', '');
 
-    // If accessing the main domain directly (no subdomain), use 'demo' as default
-    if (currentHost === 'localhost' || currentHost.includes('netlify.app') || currentHost.includes('vercel.app')) {
-        currentHost = 'demo';
+    // If accessing the main domain directly (no subdomain), allow access to landing page
+    if (currentHost === 'kubikonlinedelivery' || currentHost === 'www' || currentHost === 'localhost') {
+        return NextResponse.next();
     }
 
     const searchParams = req.nextUrl.searchParams.toString();
