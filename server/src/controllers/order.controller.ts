@@ -211,3 +211,31 @@ export const getReports = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+// @desc    Track order (Public/Guest)
+// @route   GET /api/orders/track/:id
+// @access  Public
+export const getTrackOrder = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        // Find order
+        const order = await prisma.order.findUnique({
+            where: { id },
+            include: {
+                items: { include: { product: true } },
+                status: true,
+                store: { select: { name: true, customDomain: true, slug: true } }
+            }
+        });
+
+        if (!order) {
+            res.status(404).json({ message: 'Order not found' });
+            return;
+        }
+
+        res.json(order);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
