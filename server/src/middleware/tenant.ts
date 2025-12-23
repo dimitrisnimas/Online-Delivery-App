@@ -45,6 +45,16 @@ export const resolveTenant = async (req: Request, res: Response, next: NextFunct
             // We will attach store if found, otherwise undefined.
         } else {
             req.store = store;
+
+            // Licensing Check: Check if store is active
+            if (!store.isActive && !req.path.includes('/superadmin')) {
+                // Allow superadmin access even if store is inactive? 
+                // Or maybe checking req.user for superadmin? 
+                // For now, simple check.
+                return res.status(503).json({
+                    message: 'This store is temporarily unavailable. Please contact support.'
+                });
+            }
         }
 
         next();
