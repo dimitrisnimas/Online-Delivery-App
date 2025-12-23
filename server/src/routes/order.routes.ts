@@ -4,7 +4,7 @@ import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', protect, createOrder);
+router.post('/', createOrder); // Public access for guest checkout (controller checks for user or guest details)
 router.get('/', protect, getStoreOrders); // Needs admin check ideally, but protect + store context check is start
 router.get('/my', protect, getMyOrders);
 
