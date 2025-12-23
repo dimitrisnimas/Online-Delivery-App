@@ -120,6 +120,10 @@ export const getStoreOrders = async (req: Request, res: Response): Promise<void>
 // @access  Private
 export const getMyOrders = async (req: Request, res: Response): Promise<void> => {
     try {
+        if (!req.user) {
+            res.status(401).json({ message: 'User not found' });
+            return;
+        }
         const orders = await prisma.order.findMany({
             where: { userId: req.user.id },
             include: { items: { include: { product: true } }, status: true },
