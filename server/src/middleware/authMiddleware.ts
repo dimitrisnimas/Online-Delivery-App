@@ -15,7 +15,7 @@ declare global {
             user?: {
                 id: string;
                 role: string;
-                storeId: string;
+                storeId: string | null;
                 isSuperAdmin?: boolean;
             };
         }
@@ -56,7 +56,13 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
                 }
             }
 
-            req.user = user;
+            // Assign user with corrected types
+            req.user = {
+                id: user.id,
+                role: user.role,
+                storeId: user.storeId,
+                isSuperAdmin: user.isSuperAdmin
+            };
             next();
         } catch (error) {
             console.error(error);
