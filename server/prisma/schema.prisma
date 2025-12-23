@@ -18,11 +18,19 @@ model Store {
   name        String
   slug        String   @unique // For subdomain like slug.deliveryapp.com
   customDomain String? @unique // For mystore.com
+  
+  description String?  // Store presentation/about
+  logo        String?  // Store logo URL
+  coverImage  String?  // Hero/cover image URL
+  
+  isActive    Boolean  @default(true) // For licensing - inactive stores are hidden
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
   settings    Json?    // Delivery fees, times, etc.
 
+  subscription Subscription?
   branches    Branch[]
   users       User[]
   products    Product[]
@@ -47,13 +55,16 @@ model User {
   name      String?
   role      Role     @default(CUSTOMER)
   
-  storeId   String
-  store     Store    @relation(fields: [storeId], references: [id])
+  isSuperAdmin Boolean @default(false) // Platform super admin
+  
+  storeId   String?  // Nullable for super admin users
+  store     Store?   @relation(fields: [storeId], references: [id])
 
   addresses Address[]
   orders    Order[]
 
-  @@unique([email, storeId])
+  @@unique([email, storeId]) // Same email can exist per store
+  @@index([email])
 }
 
 model Address {
@@ -172,4 +183,20 @@ model OrderItemAddon {
   addon       Addon  @relation(fields: [addonId], references: [id])
   
   price       Decimal @db.Decimal(10, 2)
+}
+
+model Subscription {
+  id          String   @id @default(uuid())
+  storeId     String   @unique
+  store       Store    @relation(fields: [storeId], references: [id])
+  
+  plan        String   // FREE, BASIC, PREMIUM
+  status      String   // ACTIVE, SUSPENDED, CANCELLED
+  
+  startDate   DateTime
+  endDate     DateTime?
+  lastPayment DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
