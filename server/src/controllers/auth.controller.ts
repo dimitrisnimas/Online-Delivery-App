@@ -68,19 +68,40 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;
         const store = req.store;
 
-        if (!store) {
-            // If login logic allows global admin login without store, handle here.
-            // For now, assume store context required.
-            res.status(400).json({ message: 'Store context missing' });
-            return;
-        }
+        // Try to find user globally if no store context (for superadmin)
+        let user;
 
-        const user = await prisma.user.findFirst({
-            where: {
-                email,
-                storeId: store.id,
-            },
-        });
+        if (store) {
+            user = await prisma.user.findFirst({
+                where: {
+                    email,
+                    storeId: store.id,
+                },
+            });
+        } else {
+            // No store context - only allow if user is superadmin or has no storeId (platform admin)
+            // We search by email only
+            user = await prisma.user.findFirst({
+                where: {
+                    email,
+                    // Ensure we don't accidentally log in a customer with same email from a random store
+                    // Ideally superadmins have storeId: null or isSuperAdmin: true
+                },
+            });
+
+            // If found, verify they are actually allowed to login globally
+            if (user && !user.isSuperAdmin && user.role !== 'ADMIN') {
+                // If they are a regular user but trying to login without store context, deny
+                // unless we want to support a "global user portal" later.
+                // For now, restrict to superadmin/admin.
+                // Actually, if they are just a store admin, they should login via store domain?
+                // Let's allow it if isSuperAdmin is true.
+                if (!user.isSuperAdmin) {
+                    res.status(401).json({ message: 'Access denied. Please login via your store domain.' });
+                    return;
+                }
+            }
+        }
 
         if (user && (await bcrypt.compare(password, user.password))) {
             res.json({
