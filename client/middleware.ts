@@ -33,7 +33,12 @@ export default async function middleware(req: NextRequest) {
         .replace('.localhost', '');
 
     // If accessing the main domain directly (no subdomain), allow access to landing page
-    if (currentHost === 'kubikonlinedelivery' || currentHost === 'www' || currentHost === 'localhost') {
+    if (
+        currentHost === 'kubikonlinedelivery' ||
+        currentHost === 'www' ||
+        currentHost === 'localhost' ||
+        currentHost === 'onlinedelivery.kubik.gr' // Add custom domain here
+    ) {
         return NextResponse.next();
     }
 
