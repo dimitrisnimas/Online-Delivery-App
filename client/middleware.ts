@@ -26,11 +26,12 @@ export default async function middleware(req: NextRequest) {
         currentHost = currentHost.split(':')[0];
     }
 
-    // Remove .netlify.app or .vercel.app
+    // Remove .netlify.app, .vercel.app, .localhost, or custom domain
     currentHost = currentHost
         .replace('.netlify.app', '')
         .replace('.vercel.app', '')
-        .replace('.localhost', '');
+        .replace('.localhost', '')
+        .replace('.onlinedelivery.kubik.gr', ''); // Strip custom root domain
 
     // If accessing the main domain directly (no subdomain), allow access to landing page
     if (
