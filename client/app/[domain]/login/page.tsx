@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '../../../store/useAuth';
 
 export default function LoginPage() {
@@ -9,6 +9,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const router = useRouter();
+    const params = useParams();
     const login = useAuth((state) => state.login);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -16,32 +17,14 @@ export default function LoginPage() {
         setError('');
 
         try {
-            // Need store context. Since we are on client, we should theoretically know the store.
-            // But the API handles resolution via Headers.
-            // We rely on the Middleware/Browser sending the Host header or we need to pass strict header.
-            // If we are on `store1.com`, the browser sends Host: store1.com.
-            // The API resolves it. 
-            // If we are on `localhost:3000/[domain]/login`, the Host is localhost:3000.
-            // We MUST pass the domain down to the client component to send as header if we aren't using subdomains locally.
-
-            // Issue: `useRouter` or `useParams` can give us domain.
-            // But `fetch` from client needs to send it manually if we are using path-based routing in dev.
-            // In prod (subdomains), Host header is automatic.
-
-            // Let's assume we extract domain from URL or props.
-            // Client component doesn't have `params` prop automatically unless passed from Page.
-            // We are in `app/[domain]/login/page.tsx`.
-
-            // Wait, this file is the Page component. It gets params!
-            // But I marked "use client" so I can't use async params in same file easily in Next 15, but Next 14 is fine.
-            // Actually `params` is a promise in recent Next.js versions.
-            // Let's wrapping the form in a client component or use `useParams`.
+            // Get domain from params
+            const domain = params.domain as string;
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // 'x-store-slug': params.domain // We need this!
+                    'x-store-slug': domain
                 },
                 body: JSON.stringify({ email, password }),
             });
@@ -50,7 +33,7 @@ export default function LoginPage() {
 
             if (res.ok) {
                 login(data);
-                router.push('../'); // Back to home
+                router.push(`/${domain}/dashboard`);
             } else {
                 setError(data.message || 'Login failed');
             }
