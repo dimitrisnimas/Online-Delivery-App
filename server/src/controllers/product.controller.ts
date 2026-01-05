@@ -57,4 +57,78 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-// ... Add update/delete later
+// @desc    Update a product
+// @route   PUT /api/products/:id
+// @access  Private (Admin/Staff)
+export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { name, description, price, categoryId } = req.body;
+        const store = req.store;
+
+        const product = await prisma.product.findUnique({
+            where: { id: req.params.id }
+        });
+
+        if (!product) {
+            res.status(404).json({ message: 'Product not found' });
+            return;
+        }
+
+        if (product.storeId !== store?.id) {
+            res.status(401).json({ message: 'Not authorized' });
+            return;
+        }
+
+        let image = product.image;
+        if (req.file) {
+            image = `/uploads/${req.file.filename}`;
+        }
+
+        const updatedProduct = await prisma.product.update({
+            where: { id: req.params.id },
+            data: {
+                name,
+                description,
+                price: price ? Number(price) : undefined,
+                image,
+                categoryId
+            }
+        });
+
+        res.json(updatedProduct);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc    Delete a product
+// @route   DELETE /api/products/:id
+// @access  Private (Admin/Staff)
+export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const store = req.store;
+        const product = await prisma.product.findUnique({
+            where: { id: req.params.id }
+        });
+
+        if (!product) {
+            res.status(404).json({ message: 'Product not found' });
+            return;
+        }
+
+        if (product.storeId !== store?.id) {
+            res.status(401).json({ message: 'Not authorized' });
+            return;
+        }
+
+        await prisma.product.delete({
+            where: { id: req.params.id }
+        });
+
+        res.json({ message: 'Product removed' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

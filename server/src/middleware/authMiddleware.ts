@@ -83,6 +83,14 @@ export const admin = (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+export const storeAdmin = (req: Request, res: Response, next: NextFunction) => {
+    if (req.user && req.user.role === 'ADMIN') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Store Admin access required' });
+    }
+};
+
 export const superAdmin = (req: Request, res: Response, next: NextFunction) => {
     if (req.user && req.user.isSuperAdmin) {
         next();
