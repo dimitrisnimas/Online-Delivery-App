@@ -9,8 +9,11 @@ interface Product {
     image: string;
 }
 
+import { useParams } from 'next/navigation';
+
 export default function MenuManagement() {
     const { user } = useAuth();
+    const params = useParams();
     const [products, setProducts] = useState<Product[]>([]);
     // Add form state for creating product...
 
@@ -20,9 +23,14 @@ export default function MenuManagement() {
 
     const fetchProducts = async () => {
         try {
+            const domain = params.domain as string;
             // Public endpoint, but we might want a private one for full details?
             // Using public for now.
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
+                headers: {
+                    'x-store-slug': domain
+                }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setProducts(data);

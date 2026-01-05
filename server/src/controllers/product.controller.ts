@@ -8,7 +8,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     try {
         const store = req.store;
         if (!store) {
-            res.json({ message: 'Store context required' });
+            res.status(400).json({ message: 'Store context required' });
             return;
         }
 
