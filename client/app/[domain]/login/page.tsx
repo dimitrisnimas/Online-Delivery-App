@@ -21,22 +21,9 @@ export default function LoginPage() {
             const domain = params.domain as string;
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-store-slug': domain
-                },
-                body: JSON.stringify({ email, password }),
-            };
-
-            return (
-                <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-                    <div className="max-w-md w-full space-y-8">
-                        <div>
-                            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                                Sign in to your account
-                            </h2>
-                        </div>
+                Sign in to your account
+                            </h2 >
+                        </div >
                         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                             <input type="hidden" name="remember" defaultValue="true" />
                             <div className="rounded-md shadow-sm -space-y-px">
@@ -86,7 +73,7 @@ export default function LoginPage() {
                                 Create an account
                             </a>
                         </div>
-                    </div>
-                </div>
+                    </div >
+                </div >
             );
-        }
+}
