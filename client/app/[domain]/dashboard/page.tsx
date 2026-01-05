@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../store/useAuth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import StoreOrders from '../../../components/StoreOrders';
 import MenuManagement from '../../../components/MenuManagement';
 import StaffManagement from '../../../components/StaffManagement';
@@ -18,6 +18,7 @@ interface Order {
 export default function DashboardPage() {
     const { user } = useAuth();
     const router = useRouter();
+    const params = useParams();
     const [activeTab, setActiveTab] = useState('orders');
     const [customerOrders, setCustomerOrders] = useState<Order[]>([]);
     const [revenue, setRevenue] = useState<{ totalSales: number; totalOrders: number } | null>(null);
@@ -38,8 +39,12 @@ export default function DashboardPage() {
     const fetchCustomerOrders = async () => {
         if (!user) return;
         try {
+            const domain = params.domain as string;
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/my`, {
-                headers: { 'Authorization': `Bearer ${user.token}` }
+                headers: {
+                    'Authorization': `Bearer ${user.token}`,
+                    'x-store-slug': domain
+                }
             });
             if (res.ok) {
                 const data = await res.json();
@@ -53,8 +58,12 @@ export default function DashboardPage() {
     const fetchRevenue = async () => {
         if (!user) return;
         try {
+            const domain = params.domain as string;
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/reports`, {
-                headers: { 'Authorization': `Bearer ${user.token}` }
+                headers: {
+                    'Authorization': `Bearer ${user.token}`,
+                    'x-store-slug': domain
+                }
             });
             if (res.ok) {
                 const data = await res.json();

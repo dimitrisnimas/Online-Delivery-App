@@ -11,8 +11,11 @@ interface Order {
     guestName?: string;
 }
 
+import { useParams } from 'next/navigation';
+
 export default function StoreOrders() {
     const { user } = useAuth();
+    const params = useParams();
     const [orders, setOrders] = useState<Order[]>([]);
 
     useEffect(() => {
@@ -21,9 +24,11 @@ export default function StoreOrders() {
 
     const fetchOrders = async () => {
         try {
+            const domain = params.domain as string;
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
                 headers: {
-                    'Authorization': `Bearer ${user?.token}`
+                    'Authorization': `Bearer ${user?.token}`,
+                    'x-store-slug': domain
                 }
             });
             if (res.ok) {

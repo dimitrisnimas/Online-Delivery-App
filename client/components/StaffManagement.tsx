@@ -8,8 +8,11 @@ interface Staff {
     role: string;
 }
 
+import { useParams } from 'next/navigation';
+
 export default function StaffManagement() {
     const { user } = useAuth();
+    const params = useParams();
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -23,9 +26,11 @@ export default function StaffManagement() {
 
     const fetchStaff = async () => {
         try {
+            const domain = params.domain as string;
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/staff`, {
                 headers: {
-                    'Authorization': `Bearer ${user?.token}`
+                    'Authorization': `Bearer ${user?.token}`,
+                    'x-store-slug': domain
                 }
             });
             if (res.ok) {
@@ -43,11 +48,13 @@ export default function StaffManagement() {
         setSuccess('');
 
         try {
+            const domain = params.domain as string;
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/staff`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user?.token}`
+                    'Authorization': `Bearer ${user?.token}`,
+                    'x-store-slug': domain
                 },
                 body: JSON.stringify({ name, email, password })
             });
